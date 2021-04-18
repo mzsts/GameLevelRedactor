@@ -1,0 +1,108 @@
+﻿<Window x:Class="GameLevelRedactor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GameLevelRedactor"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        mc:Ignorable="d"
+        WindowState="Maximized"
+        Title="Редактор уровней" MinHeight="450" MinWidth="800">
+
+    <Grid Background="{DynamicResource {x:Static SystemColors.GradientActiveCaptionBrushKey}}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="150"/>
+        </Grid.ColumnDefinitions>
+        <Menu Grid.ColumnSpan="3"
+              Height="25"
+              VerticalAlignment="Top" HorizontalAlignment="Stretch" Width="Auto">
+            <MenuItem Header="Файл">
+                <MenuItem Header="Создать"/>
+                <MenuItem Header="Открыть"/>
+                <MenuItem Header="Сохранить" Click="SaveFile"/>
+                <MenuItem Header="Закрыть"/>
+            </MenuItem>
+            <MenuItem Header="Экспорт"></MenuItem>
+        </Menu>
+        <ToolBar Grid.Row="1" Grid.Column="2" Height="30">
+            <Button x:Name="arrowButton">
+                <Image Source="ToolbarImages/cursor.png" Width="24"/>
+            </Button>
+            <Button x:Name="ellipseButton">
+                <Image Source="ToolbarImages/ellipse.png" Width="24"/>
+            </Button>
+            <Button x:Name="rectButton">
+                <Image Source="ToolbarImages/rectangle.png" Width="24"/>
+            </Button>
+            <Button x:Name="triangleButton">
+                <Image Source="ToolbarImages/triangle.png" Width="24"/>
+            </Button>
+            <Button x:Name="lineButton">
+                <Image Source="ToolbarImages/line.png" Width="24"/>
+            </Button>
+        </ToolBar>
+        <StackPanel Grid.Column="2" Grid.Row="2" Background="{DynamicResource {x:Static SystemColors.AppWorkspaceBrushKey}}">
+            <TreeView  x:Name="FiguresVisualTreeView" MinHeight="150">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate ItemsSource="{Binding Path=Primitives}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Title}" />
+                            <TextBlock Text=" [" Foreground="Blue" />
+                            <TextBlock Text="{Binding Primitives.Count}" Foreground="Blue" />
+                            <TextBlock Text="]" Foreground="Blue" />
+                        </StackPanel>
+                        <HierarchicalDataTemplate.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=Type}"/>
+                            </DataTemplate>
+                        </HierarchicalDataTemplate.ItemTemplate>
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+            <StackPanel MinHeight="150" x:Name="shapeProperty" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                    <TextBlock Text="Цвет заливки:"/>
+                    <xctk:ColorPicker Name="fillColor" Width="50" Margin="10,0,0,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                    <TextBlock Text="Цвет границ:"/>
+                    <xctk:ColorPicker Name="borderColor" Width="50" Margin="10,0,0,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                    <TextBlock Text="Ширина границ:"/>
+                    <xctk:IntegerUpDown Name="borderWidth" Margin="5,0,0,0" Minimum="0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                    <TextBlock Text="Угол наклона:"/>
+                    <xctk:IntegerUpDown Name="figureAngle" Margin="5,0,0,0" Minimum="0"/>
+                </StackPanel>
+                <Button x:Name ="unitFiguresButton" Content="Объединить с.."/>
+                <Button x:Name ="setMajorFigureButton" Content="Связать с.."/>
+            </StackPanel>
+        </StackPanel>
+        <Canvas Name="canvas" 
+                Grid.Row="1" Grid.RowSpan="2" 
+                Grid.Column="0" Grid.ColumnSpan="2" 
+                MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
+                MouseMove="Canvas_MouseMove"
+                MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
+                Background="WhiteSmoke">
+
+            <Border>
+                <Border.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="" Command=""/>
+                    </ContextMenu>
+                </Border.ContextMenu>
+            </Border>
+        </Canvas>
+
+    </Grid>
+</Window>

@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="ToolbarImages\cursor.png" />
+    <None Remove="ToolbarImages\ellipse.png" />
+    <None Remove="ToolbarImages\line.png" />
+    <None Remove="ToolbarImages\rectangle.png" />
+    <None Remove="ToolbarImages\triangle.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Extended.Wpf.Toolkit" Version="4.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="System.Text.Json" Version="5.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="ToolbarImages\cursor.png" />
+    <Resource Include="ToolbarImages\ellipse.png" />
+    <Resource Include="ToolbarImages\line.png" />
+    <Resource Include="ToolbarImages\rectangle.png" />
+    <Resource Include="ToolbarImages\triangle.png" />
+  </ItemGroup>
+
+</Project>
