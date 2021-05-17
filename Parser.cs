@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 using GameLevelRedactor.Data;
 
@@ -18,9 +16,13 @@ namespace GameLevelRedactor
 
             return JsonSerializer.Serialize(levelData);
         }
-        //public static IList<Figure> FromJson(string levelData)
-        //{
-
-        //}
+        public static IList<Figure> FromJson(string data)
+        {
+            return null;
+        }
+        public static LevelData GetLevelData(string data)
+        {
+            return JsonSerializer.Deserialize<LevelData>(data);
+        }
     }
 }

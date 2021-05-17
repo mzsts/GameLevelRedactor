@@ -22,9 +22,9 @@ namespace GameLevelRedactor.Data
         public FigureData()
         {
         }
-        public FigureData(Figure figure, Point pictureLovation)
+        public FigureData(Figure figure)
         {
-            PrimitivesData = new List<PrimitiveData>();
+            PrimitivesData = new();
 
             Id = figure.Id;
             Title = figure.Title;
@@ -34,13 +34,12 @@ namespace GameLevelRedactor.Data
             Height = (int)figure.ActualHeight;
             MajorFigureId = figure.MajorFigureId;
             AnchorFiguresId = figure.AnchorFiguresId;
-            Drawpoint = new((int)(figure.DrawPoint.X - pictureLovation.X), 
-                            (int)(figure.DrawPoint.Y - pictureLovation.Y));
+            Drawpoint = new((int)figure.DrawPoint.X,(int)figure.DrawPoint.Y);
             AnchorPoint = new((int)figure.AnchorPoint.X, (int)figure.AnchorPoint.Y);
 
             foreach (Primitive primitive in figure.Primitives)
             {
-                PrimitivesData.Add(new PrimitiveData(primitive, Drawpoint));
+                PrimitivesData.Add(new(primitive, Drawpoint));
             }
         }
     }

@@ -1,0 +1,44 @@
+﻿<Window x:Class="GameLevelRedactor.ExportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:GameLevelRedactor"
+        mc:Ignorable="d"
+        Title="Экспорт файлов" Height="450" Width="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.8*"/>
+            <ColumnDefinition Width="0.2*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        
+        <ListView x:Name="levelsList"
+                  Grid.RowSpan="2"
+                  Background="LightBlue"
+                  AllowDrop="True"
+                  DragEnter="LevelsList_DragEnter"
+                  DragLeave="LevelsList_DragLeave"
+                  Drop="LevelsList_Drop">
+
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Название уровня: "/>
+                            <TextBlock Text="{Binding Path=Title}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Количество фигур: "/>
+                            <TextBlock Text="{Binding Path=FiguresData.Count}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        
+    </Grid>
+</Window>

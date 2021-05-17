@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Collections.ObjectModel;
 using System.IO;
 using System;
+using Microsoft.Win32;
 
 namespace GameLevelRedactor
 {
@@ -18,24 +19,28 @@ namespace GameLevelRedactor
     }
     public enum HitTypes
     {
-        None,
-        Body
+        None, Body, BR, R, B
+    }
+    public enum ActionTypes
+    {
+        Draw,
+        Drag,
+        Resize,
+        Unit,
+        Link,
+        None
     }
     public partial class MainWindow : Window
     {
         private Figure currentFigure;
         private Figure tempFigure;
-        private ObservableCollection<Figure> figures;
+        private ObservableCollection<Figure> figures = new();
 
-        private HitTypes hitType; 
-        private Tools currentTool;
+        private HitTypes hitType;
+        private Tools currentTool = Tools.Arrow;
+        private ActionTypes currentAction = ActionTypes.None;
 
         private int lastZIndex;
-
-        private bool IsDraging;
-        private bool IsDrawing;
-        private bool IsUnitFigures;
-        private bool IsLinking;
 
         public MainWindow()
         {
@@ -43,19 +48,23 @@ namespace GameLevelRedactor
 
             InitButtons();
             InitHotKeys();
-            currentTool = Tools.Arrow;
 
             fillColor.SelectedColor = Colors.Blue;
             borderColor.SelectedColor = Colors.Black;
             borderWidth.Value = 2;
-
-            figures = new ObservableCollection<Figure>();
+            figureAngle.Value = 0;
             FiguresVisualTreeView.ItemsSource = figures;
 
+            exportButton.Click += (s, e) => new ExportWindow().Show();
+            
             FiguresVisualTreeView.SelectedItemChanged += (s, e) =>
             {
                 if (FiguresVisualTreeView.SelectedItem is Figure figure)
+                {
                     currentFigure = figure;
+                    figureAngle.Value = (int)currentFigure.Angle;
+                    figureTitle.Text = currentFigure.Title;
+                }
 
                 if (FiguresVisualTreeView.SelectedItem is Primitive primitive)
                 {
@@ -63,6 +72,42 @@ namespace GameLevelRedactor
                     borderColor.SelectedColor = ((SolidColorBrush)primitive.GeometryDrawing.Pen.Brush).Color;
                     borderWidth.Value = (int)primitive.GeometryDrawing.Pen.Thickness;
                 }
+            };
+
+            figureAngle.ValueChanged += (s, e) =>
+            {
+                if (figureAngle.Value != null)
+                    currentFigure.Angle = (double)figureAngle.Value;
+            };
+            figureTitle.TextChanged += (s, e) =>
+            {
+                if (!String.IsNullOrEmpty(figureTitle.Text))
+                {
+                    currentFigure.Title = figureTitle.Text;
+                }
+            };
+
+            fillColor.SelectedColorChanged += (s, e) =>
+            {
+                if (FiguresVisualTreeView.SelectedItem is Primitive primitive)
+                {
+                    primitive.GeometryDrawing.Brush = new SolidColorBrush((Color)fillColor.SelectedColor);
+                }
+            };
+            borderColor.SelectedColorChanged += (s, e) =>
+            {
+                if (FiguresVisualTreeView.SelectedItem is Primitive primitive)
+                {
+                    primitive.GeometryDrawing.Pen.Brush = new SolidColorBrush((Color)borderColor.SelectedColor);
+                }
+            };
+            borderWidth.ValueChanged += (s, e) =>
+            {
+                if (FiguresVisualTreeView.SelectedItem is Primitive primitive)
+                {
+                    primitive.GeometryDrawing.Pen.Thickness = (double)borderWidth.Value;
+                }
+                
             };
         }
 
@@ -72,7 +117,8 @@ namespace GameLevelRedactor
 
             if (currentTool != Tools.Arrow)
             {
-                IsDrawing = true;
+                currentAction = ActionTypes.Draw;
+
                 currentFigure = new Figure
                 {
                     DrawPoint = currentPoint
@@ -92,18 +138,16 @@ namespace GameLevelRedactor
                 Canvas.SetLeft(currentFigure, currentPoint.X);
                 Canvas.SetZIndex(currentFigure, ++lastZIndex);
 
-                
-
                 return;
             }
 
-            if (IsUnitFigures)
+            if (currentAction == ActionTypes.Unit)
             {
                 UnitFigures(currentPoint);
                 return;
             }
 
-            if (IsLinking)
+            if (currentAction == ActionTypes.Link)
             {
                 LinkFigures(currentPoint);
                 return;
@@ -111,15 +155,19 @@ namespace GameLevelRedactor
 
             if (currentTool == Tools.Arrow && (currentFigure = GetFigure(currentPoint)) != null)
             {
-
                 hitType = SetHitType(currentFigure, currentPoint);
                 SetCursor();
 
                 if (hitType == HitTypes.Body)
                 {
-                    IsDraging = true;
+                    currentAction = ActionTypes.Drag;
                     Canvas.SetZIndex(currentFigure, ++lastZIndex);
+                    return;
+                }
 
+                if (hitType != HitTypes.None)
+                {
+                    currentAction = ActionTypes.Resize;
                     return;
                 }
             }
@@ -131,15 +179,21 @@ namespace GameLevelRedactor
         {
             Point currentPoint = e.GetPosition(canvas);
 
-            if (IsDrawing)
+            if (currentAction == ActionTypes.Draw)
             {
                 Draw(currentPoint);
                 return;
             }
 
-            if (IsDraging)
+            if (currentAction == ActionTypes.Drag)
             {
                 Drag(currentPoint);
+                return;
+            }
+
+            if (currentAction == ActionTypes.Resize)
+            {
+                Resize(currentPoint);
                 return;
             }
 
@@ -148,29 +202,20 @@ namespace GameLevelRedactor
         }
         private void Canvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (IsDrawing)
+            if (currentAction == ActionTypes.Draw)
             {
                 currentFigure.DrawPoint = currentFigure.Primitives[0].GeometryDrawing.Bounds.TopLeft;
-                IsDrawing = false;
-
                 figures.Add(currentFigure);
             }
 
-            if (IsDraging)
+            if (currentAction == ActionTypes.Drag)
             {
-                Point newDrawPoint = new();
-
-                newDrawPoint.X = Canvas.GetLeft(currentFigure);
-                newDrawPoint.Y = Canvas.GetTop(currentFigure);
-
-                MakeNewPrimitive(newDrawPoint);
-
-                currentFigure.DrawPoint = newDrawPoint;
-
-                IsDraging = false;
+                currentFigure.DrawPoint = GetDrawPoint();
+                MakeNewPrimitive(currentFigure.DrawPoint);
             }
+
+            currentAction = ActionTypes.None;
         }
-        
         private void Draw(Point currentPoint)
         {
             switch (currentTool)
@@ -211,71 +256,115 @@ namespace GameLevelRedactor
             double y_pos = currentPoint.Y - height / 2;
 
             if (x_pos >= 0 && y_pos >= 0 
-                && x_pos + width <= canvas.ActualWidth 
+                && x_pos + width <= canvas.ActualWidth
                 && y_pos + height <= canvas.ActualHeight)
             {
                 Canvas.SetTop(currentFigure, y_pos);
                 Canvas.SetLeft(currentFigure, x_pos);
             }
         }
+        private void Resize(Point currentPoint)
+        {
+            switch (hitType)
+            {
+                case HitTypes.BR:
+                    if (currentPoint.X > currentFigure.DrawPoint.X && currentPoint.Y > currentFigure.DrawPoint.Y)
+                    {
+                        ((Image)currentFigure.Child).Width = currentPoint.X - currentFigure.DrawPoint.X;
+                        ((Image)currentFigure.Child).Height = currentPoint.Y - currentFigure.DrawPoint.Y;
+                    }
+                    break;
+                case HitTypes.R:
+                    if (currentPoint.X > currentFigure.DrawPoint.X)
+                    {
+                        ((Image)currentFigure.Child).Width = currentPoint.X - currentFigure.DrawPoint.X;
+                        ((Image)currentFigure.Child).Height = ((Image)currentFigure.Child).Height;
+                    }
+                    break;
+                case HitTypes.B:
+                    if (currentPoint.Y > currentFigure.DrawPoint.Y) 
+                    {
+                        ((Image)currentFigure.Child).Height = currentPoint.Y - currentFigure.DrawPoint.Y;
+                        ((Image)currentFigure.Child).Width = ((Image)currentFigure.Child).Width;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
         private void UnitFigures(Point currentPoint)
         {
-            Figure temp = GetFigure(currentPoint);
-
-            foreach (Primitive primitive in currentFigure.Primitives)
+            if (GetFigure(currentPoint) is Figure temp && temp != currentFigure && temp != null && currentFigure != null)
             {
-                temp.Primitives.Add(primitive);
-            }
 
-            Point newFigurePos = new();
+                foreach (Primitive primitive in currentFigure.Primitives)
+                {
+                    temp.Primitives.Add(primitive);
+                }
 
-            if (temp.DrawPoint.X < currentFigure.DrawPoint.X)
-            {
-                newFigurePos.X = temp.DrawPoint.X;
+                Point newFigurePos = new();
+
+                if (temp.DrawPoint.X < currentFigure.DrawPoint.X)
+                {
+                    newFigurePos.X = temp.DrawPoint.X;
+                }
+                else
+                {
+                    newFigurePos.X = currentFigure.DrawPoint.X;
+                }
+
+                if (temp.DrawPoint.Y < currentFigure.DrawPoint.Y)
+                {
+                    newFigurePos.Y = temp.DrawPoint.Y;
+                }
+                else
+                {
+                    newFigurePos.Y = currentFigure.DrawPoint.Y;
+                }
+
+                temp.DrawPoint = newFigurePos;
+
+                canvas.Children.Remove(currentFigure);
+                figures.Remove(currentFigure);
+
+                Canvas.SetLeft(temp, newFigurePos.X);
+                Canvas.SetTop(temp, newFigurePos.Y);
+
+                currentFigure = temp;
             }
             else
             {
-                newFigurePos.X = currentFigure.DrawPoint.X;
+                MessageBox.Show("Действие невозможно");
             }
 
-            if (temp.DrawPoint.Y < currentFigure.DrawPoint.Y)
-            {
-                newFigurePos.Y = temp.DrawPoint.Y;
-            }
-            else
-            {
-                newFigurePos.Y = currentFigure.DrawPoint.Y;
-            }
-
-            temp.DrawPoint = newFigurePos;
-
-            canvas.Children.Remove(currentFigure);
-            figures.Remove(currentFigure);
-
-            Canvas.SetLeft(temp, newFigurePos.X);
-            Canvas.SetTop(temp, newFigurePos.Y);
-
-            currentFigure = temp;
-
-            IsUnitFigures = false;
+            currentAction = ActionTypes.None;
         }
         private void LinkFigures(Point currentPoint)
         {
-            Figure temp = GetFigure(currentPoint);
-
-            if (temp != null)
+            if (GetFigure(currentPoint) is Figure temp && temp != null && currentFigure != null && temp != currentFigure)
             {
+                if (currentFigure.MajorFigureId == temp.Id || temp.MajorFigureId == currentFigure.Id)
+                {
+                    MessageBox.Show("Эти фигуры уже связаны", "Действие невозможно", MessageBoxButton.OK);
+                    currentAction = ActionTypes.None;
+                    return;
+                }
+
                 currentFigure.MajorFigureId = temp.Id;
 
                 temp.AnchorFiguresId.Add(currentFigure.Id);
 
                 currentFigure.AnchorPoint = new(temp.DrawPoint.X - currentFigure.DrawPoint.X,
                                                 temp.DrawPoint.Y - currentFigure.DrawPoint.Y);
-
-                IsLinking = false;
             }
+            else
+            {
+                MessageBox.Show("Действие невозможно");
+            }
+
+            currentAction = ActionTypes.None;
         }
-        private Rect MakeRightRect(Point p1, Point p2)
+        private static Rect MakeRightRect(Point p1, Point p2)
         {
             if (p1.X < p2.X)
             {
@@ -292,9 +381,9 @@ namespace GameLevelRedactor
                     return new Rect(p2, p1);
             }
         }
-        private PathGeometry MakeRightTriangle(Point p1, Point p2)
+        private static PathGeometry MakeRightTriangle(Point p1, Point p2)
         {
-            PathFigure pf_triangle = new PathFigure();
+            PathFigure pf_triangle = new();
             pf_triangle.IsClosed = true;
 
             Rect rect = MakeRightRect(p1, p2);
@@ -362,7 +451,16 @@ namespace GameLevelRedactor
             {
                 return null;
             }
-            return (Figure)((Image)hit.VisualHit).Parent;
+
+            try
+            {
+                return (Figure)((Image)hit.VisualHit).Parent;
+            }
+            catch (Exception)
+            { }
+            
+
+            return null;
         }
         private static HitTypes SetHitType(Figure figure, Point point)
         {
@@ -379,25 +477,14 @@ namespace GameLevelRedactor
 
             if (point.X > right)
                 return HitTypes.None;
-
-            if (point.Y < top)
+            
+            if (point.Y < top)      
                 return HitTypes.None;
-
-            if (point.Y > bottom)
+            
+            if (point.Y > bottom)   
                 return HitTypes.None;
 
             const double GAP = 10;
-            if (point.X - left < GAP)
-            {
-                // Left edge.
-                if (point.Y - top < GAP)
-                    return HitTypes.None;
-
-                if (bottom - point.Y < GAP)
-                    return HitTypes.None;
-
-                return HitTypes.None;
-            }
             if (right - point.X < GAP)
             {
                 // Right edge.
@@ -405,38 +492,35 @@ namespace GameLevelRedactor
                     return HitTypes.None;
 
                 if (bottom - point.Y < GAP)
-                    return HitTypes.None;
+                    return HitTypes.BR;
 
-                return HitTypes.None;
+                return HitTypes.R;
             }
-            if (point.Y - top < GAP)
-                return HitTypes.None;
 
             if (bottom - point.Y < GAP)
-                return HitTypes.None;
+                return HitTypes.B;
 
             return HitTypes.Body;
         }
         private void SetCursor()
         {
-            if (currentFigure == null || currentTool != Tools.Arrow)
+            if (/*currentFigure == null || */currentTool != Tools.Arrow)
             {
                 Cursor = Cursors.Arrow;
                 return;
             }
 
-            switch (hitType)
+            Cursor = hitType switch
             {
-                case HitTypes.None:
-                    Cursor = Cursors.Arrow;
-                    break;
-                case HitTypes.Body:
-                    Cursor = Cursors.SizeAll;
-                    break;
-                default:
-                    break;
-            }
+                //HitTypes.None => Cursors.Arrow,
+                HitTypes.Body => Cursors.SizeAll,
+                HitTypes.BR => Cursors.SizeNWSE,
+                HitTypes.R => Cursors.SizeWE,
+                HitTypes.B => Cursors.SizeNS,
+                _ => Cursors.Arrow,
+            };
         }
+        private Point GetDrawPoint() => new(Canvas.GetLeft(currentFigure), Canvas.GetTop(currentFigure));
         private void SetZIndexes()
         {
             foreach (var item in figures)
@@ -446,22 +530,45 @@ namespace GameLevelRedactor
         }
         private void SaveFile(object sender, EventArgs e)
         {
+            if (!IsDataCorrect())
+                return;
+
             SetZIndexes();
 
-            string jsonString = Parser.ToJson("Car", figures);
-            File.WriteAllText(@"C:\Users\MZSTS\Desktop\Car.json", jsonString);
+            SetLevelNameWindow setLevelNameWindow = new();
+
+            string levelName = "Level_1";
+
+            if (setLevelNameWindow.ShowDialog() == true)
+            {
+                levelName = setLevelNameWindow.LevelName;
+            }
+
+            string jsonString = Parser.ToJson(levelName, figures);
+
+            SaveFileDialog saveFileDialog = new() { Filter = "Файл уровня|*.json"};
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                File.WriteAllText(saveFileDialog.FileName, jsonString);
+            }
         }
         private void InitHotKeys()
         {
-            CommandBinding copyCommand = new CommandBinding() { Command = ApplicationCommands.Copy };
-            copyCommand.Executed += CopyFigure;
+            CommandBinding saveCommand = new() { Command = ApplicationCommands.Save };
+            saveCommand.Executed += SaveFile;
+            CommandBindings.Add(saveCommand);
 
+            CommandBinding copyCommand = new() { Command = ApplicationCommands.Copy };
+            copyCommand.Executed += CopyFigure;
             CommandBindings.Add(copyCommand);
 
-            CommandBinding pasteCommand = new CommandBinding() { Command = ApplicationCommands.Paste };
-            copyCommand.Executed += PasteFigure;
-
+            CommandBinding pasteCommand = new() { Command = ApplicationCommands.Paste };
+            pasteCommand.Executed += PasteFigure;
             CommandBindings.Add(pasteCommand);
+
+            CommandBinding deleteCommand = new() { Command = ApplicationCommands.Delete };
+            deleteCommand.Executed += DeleteFigure;
+            CommandBindings.Add(deleteCommand);
         }
         private void InitButtons()
         {
@@ -471,24 +578,79 @@ namespace GameLevelRedactor
             triangleButton.Click += (s, e) => currentTool = Tools.Triengle;
             lineButton.Click += (s, e) => currentTool = Tools.Line;
 
-            unitFiguresButton.Click += (s, e) => IsUnitFigures = true;
-            setMajorFigureButton.Click += (s, e) => IsLinking = true;
+            unitFiguresButton.Click += (s, e) => currentAction = ActionTypes.Unit;
+            setMajorFigureButton.Click += (s, e) =>
+            {
+                if (currentFigure.MajorFigureId == 0)
+                    currentAction = ActionTypes.Link;
+                else
+                    MessageBox.Show("Эта фигура уже имеет привязку", "Действие невозможно", MessageBoxButton.OK);
+            };
         }
-        private void CopyFigure(object sender, ExecutedRoutedEventArgs e) { } /*=>*/
-            /*tempFigure = currentFigure.Clone()*/
+        private void CopyFigure(object sender, ExecutedRoutedEventArgs e) 
+        {
+            if (currentFigure != null)
+                tempFigure = currentFigure;
+        } 
         private void PasteFigure(object sender, ExecutedRoutedEventArgs e)
         {
-            //if (tempFigure != null)
-            //{
-            //    figures.Add(tempFigure);
-            //    canvas.Children.Add(tempFigure);
+            if (tempFigure != null)
+            {
+                currentFigure = (Figure)tempFigure.Clone();
 
-            //    Canvas.SetLeft(tempFigure, tempFigure.DrawPoint.X);
-            //    Canvas.SetTop(tempFigure, tempFigure.DrawPoint.Y);
-            //    Canvas.SetZIndex(tempFigure, ++lastZIndex);
+                figures.Add(currentFigure);
+                canvas.Children.Add(currentFigure);
 
-            //    currentFigure = tempFigure;
-            //}
+                Canvas.SetLeft(currentFigure, currentFigure.DrawPoint.X);
+                Canvas.SetTop(currentFigure, currentFigure.DrawPoint.Y);
+                Canvas.SetZIndex(currentFigure, ++lastZIndex);
+            }
+        }
+        private void DeleteFigure(object sender, ExecutedRoutedEventArgs e)
+        {
+            figures.Remove(currentFigure);
+            canvas.Children.Remove(currentFigure);
+
+            if (currentFigure.MajorFigureId != 0)
+            {
+                foreach (var item in figures)
+                {
+                    if (item.Id == currentFigure.MajorFigureId)
+                    {
+                        item.AnchorFiguresId.Remove(currentFigure.Id);
+                    }
+                    if (item.MajorFigureId == currentFigure.Id)
+                    {
+                        item.MajorFigureId = 0;
+                    }
+                }
+            }
+
+            currentFigure = null;
+        }
+        private bool IsDataCorrect()
+        {
+            if (figures.Count == 0)
+            {
+                MessageBox.Show("Добавьте хотя бы одну фигуру", "Ошибка", MessageBoxButton.OK);
+                return false;
+            }
+
+            int countFiguresWithoutLink = 0;
+
+            foreach (Figure figure in figures)
+            {
+                if (figure.MajorFigureId == 0)
+                    countFiguresWithoutLink++;
+            }
+
+            if (countFiguresWithoutLink > 1)
+            {
+                MessageBox.Show("Не все фигуры связаны", "Ошибка", MessageBoxButton.OK);
+                return false;
+            }
+            
+            return true;
         }
     }
 }

@@ -24,12 +24,11 @@
               Height="25"
               VerticalAlignment="Top" HorizontalAlignment="Stretch" Width="Auto">
             <MenuItem Header="Файл">
-                <MenuItem Header="Создать"/>
                 <MenuItem Header="Открыть"/>
                 <MenuItem Header="Сохранить" Click="SaveFile"/>
                 <MenuItem Header="Закрыть"/>
             </MenuItem>
-            <MenuItem Header="Экспорт"></MenuItem>
+            <MenuItem Header="Экспорт" x:Name="exportButton"></MenuItem>
         </Menu>
         <ToolBar Grid.Row="1" Grid.Column="2" Height="30">
             <Button x:Name="arrowButton">
@@ -53,8 +52,8 @@
                 <TreeView.ItemTemplate>
                     <HierarchicalDataTemplate ItemsSource="{Binding Path=Primitives}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Title}" />
-                            <TextBlock Text=" [" Foreground="Blue" />
+                            <TextBlock Text="{Binding Title}"/>
+                            <TextBlock Text=" [" Foreground="Blue"/>
                             <TextBlock Text="{Binding Primitives.Count}" Foreground="Blue" />
                             <TextBlock Text="]" Foreground="Blue" />
                         </StackPanel>
@@ -66,43 +65,75 @@
                     </HierarchicalDataTemplate>
                 </TreeView.ItemTemplate>
             </TreeView>
-            <StackPanel MinHeight="150" x:Name="shapeProperty" Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
-                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                    <TextBlock Text="Цвет заливки:"/>
-                    <xctk:ColorPicker Name="fillColor" Width="50" Margin="10,0,0,0"/>
+            <StackPanel x:Name="primitiveProperty"
+                        Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
+                <TextBlock Text="Свойста примитива" 
+                           HorizontalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" 
+                            Margin="0,5,0,0">
+                        <TextBlock Text="Цвет заливки:"/>
+                        <xctk:ColorPicker Name="fillColor" 
+                                          Width="50" 
+                                          Margin="10,0,0,0"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                <StackPanel Orientation="Horizontal"
+                            Margin="0,5,0,0">
                     <TextBlock Text="Цвет границ:"/>
-                    <xctk:ColorPicker Name="borderColor" Width="50" Margin="10,0,0,0"/>
+                    <xctk:ColorPicker Name="borderColor" 
+                                      Width="50" 
+                                      Margin="10,0,0,0"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                <StackPanel Orientation="Horizontal"
+                            Margin="0,5,0,0">
                     <TextBlock Text="Ширина границ:"/>
-                    <xctk:IntegerUpDown Name="borderWidth" Margin="5,0,0,0" Minimum="0"/>
+                    <xctk:IntegerUpDown Name="borderWidth" 
+                                        Margin="5,0,0,0"
+                                        Minimum="0"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                <Button x:Name="disuniteFiguresButton"
+                        Content="Отсоединить"/>
+            </StackPanel>
+            <Separator/>
+            <StackPanel x:Name="figureProperty" 
+                    MinHeight="150" 
+                    Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
+                <TextBlock Text="Свойста фигуры" HorizontalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Имя: "/>
+                    <TextBox x:Name="figureTitle" MinWidth="100" MaxLength="15" MaxLines="1"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" 
+                            Margin="0,5,0,0">
                     <TextBlock Text="Угол наклона:"/>
-                    <xctk:IntegerUpDown Name="figureAngle" Margin="5,0,0,0" Minimum="0"/>
+                    <xctk:IntegerUpDown Name="figureAngle" 
+                                        Margin="5,0,0,0"
+                                        Minimum="0"/>
                 </StackPanel>
-                <Button x:Name ="unitFiguresButton" Content="Объединить с.."/>
-                <Button x:Name ="setMajorFigureButton" Content="Связать с.."/>
+                <TextBlock Text="Действия"
+                           HorizontalAlignment="Center"/>
+                <Button x:Name ="unitFiguresButton"
+                        Content="Объединить с.."/>
+                <Button x:Name ="setMajorFigureButton"
+                        Content="Связать с.."/>
+                <Button x:Name="deleteFigureButton"
+                        Content="Удалить"/>
             </StackPanel>
         </StackPanel>
-        <Canvas Name="canvas" 
-                Grid.Row="1" Grid.RowSpan="2" 
-                Grid.Column="0" Grid.ColumnSpan="2" 
+
+        <Border BorderThickness="1" 
+                BorderBrush="Black" 
+                Grid.Row="1" 
+                Grid.RowSpan="2" 
+                Grid.Column="0" 
+                Grid.ColumnSpan="2" >
+            <Canvas Name="canvas" 
                 MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
                 MouseMove="Canvas_MouseMove"
                 MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
                 Background="WhiteSmoke">
-
-            <Border>
-                <Border.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="" Command=""/>
-                    </ContextMenu>
-                </Border.ContextMenu>
-            </Border>
-        </Canvas>
+            </Canvas>
+        </Border>
+        
 
     </Grid>
 </Window>

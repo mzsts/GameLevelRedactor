@@ -7,10 +7,15 @@ using System.Windows.Media;
 
 namespace GameLevelRedactor
 {
-    public class Primitive
+    public class Primitive : ICloneable
     {
         public string Type { get; set; }
 
         public GeometryDrawing GeometryDrawing { get; set; }
+
+        public object Clone()
+        {
+            return new Primitive() { Type = Type, GeometryDrawing = GeometryDrawing.Clone() };
+        }
     }
 }
