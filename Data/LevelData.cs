@@ -11,6 +11,7 @@ namespace GameLevelRedactor.Data
         public string Title { get; set; }
         public int Height { get; set; }
         public int Width { get; set; }
+        public DateTime ModificationDate { get; set; }
         public Point DrawPoint { get; set; }
         public List<FigureData> FiguresData { get; set; }
         public LevelData()
@@ -20,10 +21,8 @@ namespace GameLevelRedactor.Data
         {
             FiguresData = new();
 
-            Point leftTop = new();
-            Point rightBottom = new();
-
-            leftTop = rightBottom = figures[0].DrawPoint;
+            Point leftTop = figures[0].DrawPoint;
+            Point rightBottom = figures[0].DrawPoint;
 
             foreach (var item in figures)
             {
@@ -45,6 +44,8 @@ namespace GameLevelRedactor.Data
             Width = (int)(rightBottom.X - leftTop.X);
             Height = (int)(rightBottom.Y - leftTop.Y);
             DrawPoint = leftTop;
+
+            ModificationDate = DateTime.Now;
         }
     }
 }

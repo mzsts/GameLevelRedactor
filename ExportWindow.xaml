@@ -7,38 +7,80 @@
         mc:Ignorable="d"
         Title="Экспорт файлов" Height="450" Width="800">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.8*"/>
-            <ColumnDefinition Width="0.2*"/>
-        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        
+
+        <Border BorderBrush="Gray" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="upItemButton"
+                            Margin="0, 0, 2, 0"
+                            ToolTip="Переместить элемент выше">
+                        <Image Source="Resources/up-arrow.png" Width="24"/>
+                    </Button>
+                    <Button x:Name="downItemButton"
+                            Margin="0, 0, 2, 0"
+                            ToolTip="Переместить элемент ниже">
+                        <Image Source="Resources/down-arrow.png" Width="24"/>
+                    </Button>
+                    <Button x:Name="deleteItemButton"
+                            ToolTip="Удалить элемент из списка">
+                        <Image Source="Resources/red-delete.png" Width="24"/>
+                    </Button>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" 
+                            Margin="5,0,0,0"
+                            Grid.Column="1">
+                    <Label Content="Тематика сета: "/>
+                    <TextBox x:Name="tematicTextBox" 
+                             MaxLines="1" MaxLength="15"
+                             MinWidth="100"
+                             BorderBrush="Black" BorderThickness="1"
+                             VerticalAlignment="Center"/>
+                </StackPanel>
+                <Button Grid.Column="2"
+                        MaxWidth="200" MinWidth="100"
+                        Margin="3"
+                        HorizontalAlignment="Right"
+                        Content="Загрузить сет"/>
+            </Grid>
+        </Border>
         <ListView x:Name="levelsList"
-                  Grid.RowSpan="2"
-                  Background="LightBlue"
+                  Grid.ColumnSpan="2"
+                  Grid.Row="1"
                   AllowDrop="True"
                   DragEnter="LevelsList_DragEnter"
-                  DragLeave="LevelsList_DragLeave"
-                  Drop="LevelsList_Drop">
-
+                  Drop="LevelsList_Drop"
+                  BorderThickness="2"
+                  BorderBrush="LightGray"
+                  ToolTip="Перетащите файлы в эту область">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Название уровня: "/>
+                            <TextBlock Text="Имя: "/>
                             <TextBlock Text="{Binding Path=Title}"/>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Количество фигур: "/>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="5, 0, 0, 0">
+                            <TextBlock Text="Фигур: "/>
                             <TextBlock Text="{Binding Path=FiguresData.Count}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="5, 0, 0, 0">
+                            <TextBlock Text="Дата изменения: "/>
+                            <TextBlock Text="{Binding Path=ModificationDate}"/>
                         </StackPanel>
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
-        
     </Grid>
 </Window>

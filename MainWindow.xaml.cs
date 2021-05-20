@@ -16,6 +16,8 @@ namespace GameLevelRedactor
         Line,
         Triengle,
         Arrow,
+        Polygon,
+        Polyline
     }
     public enum HitTypes
     {
@@ -53,6 +55,7 @@ namespace GameLevelRedactor
             borderColor.SelectedColor = Colors.Black;
             borderWidth.Value = 2;
             figureAngle.Value = 0;
+
             FiguresVisualTreeView.ItemsSource = figures;
 
             exportButton.Click += (s, e) => new ExportWindow().Show();
@@ -84,6 +87,9 @@ namespace GameLevelRedactor
                 if (!String.IsNullOrEmpty(figureTitle.Text))
                 {
                     currentFigure.Title = figureTitle.Text;
+
+                    FiguresVisualTreeView.ItemsSource = null;
+                    FiguresVisualTreeView.ItemsSource = figures;
                 }
             };
 
@@ -117,6 +123,16 @@ namespace GameLevelRedactor
 
             if (currentTool != Tools.Arrow)
             {
+                //if (e.ClickCount == 2 && currentTool == Tools.Polygon)
+                //{
+                //    ((PathGeometry)currentFigure.Primitives[0].GeometryDrawing.Geometry)
+                //            .Figures[0].Segments.Add(new LineSegment(currentPoint, true));
+
+                //    currentAction = ActionTypes.None;
+                //    currentFigure.DrawPoint = GetDrawPoint();
+                //    return;
+                //}
+
                 currentAction = ActionTypes.Draw;
 
                 currentFigure = new Figure
@@ -137,6 +153,9 @@ namespace GameLevelRedactor
                 Canvas.SetTop(currentFigure, currentPoint.Y);
                 Canvas.SetLeft(currentFigure, currentPoint.X);
                 Canvas.SetZIndex(currentFigure, ++lastZIndex);
+
+                //if (currentTool == Tools.Polygon || currentTool == Tools.Polyline)
+                //    Draw(currentPoint);
 
                 return;
             }
@@ -179,7 +198,7 @@ namespace GameLevelRedactor
         {
             Point currentPoint = e.GetPosition(canvas);
 
-            if (currentAction == ActionTypes.Draw)
+            if (currentAction == ActionTypes.Draw/* && (currentTool != Tools.Polygon || currentTool != Tools.Polyline)*/)
             {
                 Draw(currentPoint);
                 return;
@@ -240,6 +259,21 @@ namespace GameLevelRedactor
                     currentFigure.Primitives[0].GeometryDrawing.Geometry =
                         MakeRightTriangle(currentFigure.DrawPoint, currentPoint);
                     break;
+                //case Tools.Polygon:
+                //    if (currentFigure.Primitives[0].Type == null)
+                //    {
+                //        currentFigure.Primitives[0].Type = "Многоугольник";
+                //        PathFigure pf = new() { IsClosed = true };
+                //        pf.StartPoint = currentPoint;
+                //        currentFigure.Primitives[0].GeometryDrawing.Geometry = new PathGeometry() { FillRule = FillRule.Nonzero };
+                //        ((PathGeometry)currentFigure.Primitives[0].GeometryDrawing.Geometry).Figures.Add(pf);
+                //    }
+                //    else
+                //    {
+                //        ((PathGeometry)currentFigure.Primitives[0].GeometryDrawing.Geometry)
+                //            .Figures[0].Segments.Add(new LineSegment(currentPoint, true));
+                //    }
+                //    break;
                 default:
                     break;
             }
@@ -395,7 +429,7 @@ namespace GameLevelRedactor
             pf_triangle.Segments.Add(new LineSegment(rect.BottomRight, true));
             pf_triangle.Segments.Add(new LineSegment(tr_point, true));
 
-            PathGeometry triangle = new PathGeometry();
+            PathGeometry triangle = new();
             triangle.Figures.Add(pf_triangle);
 
             return triangle;
@@ -576,6 +610,8 @@ namespace GameLevelRedactor
             ellipseButton.Click += (s, e) => currentTool = Tools.Ellipse;
             rectButton.Click += (s, e) => currentTool = Tools.Rect;
             triangleButton.Click += (s, e) => currentTool = Tools.Triengle;
+            polygoneButton.Click += (s, e) => currentTool = Tools.Polygon;
+            polylineButton.Click += (s, e) => currentTool = Tools.Polyline;
             lineButton.Click += (s, e) => currentTool = Tools.Line;
 
             unitFiguresButton.Click += (s, e) => currentAction = ActionTypes.Unit;
@@ -586,6 +622,8 @@ namespace GameLevelRedactor
                 else
                     MessageBox.Show("Эта фигура уже имеет привязку", "Действие невозможно", MessageBoxButton.OK);
             };
+            
+
         }
         private void CopyFigure(object sender, ExecutedRoutedEventArgs e) 
         {
@@ -608,6 +646,8 @@ namespace GameLevelRedactor
         }
         private void DeleteFigure(object sender, ExecutedRoutedEventArgs e)
         {
+            if (currentFigure == null)
+                return;
             figures.Remove(currentFigure);
             canvas.Children.Remove(currentFigure);
 

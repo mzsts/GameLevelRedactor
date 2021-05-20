@@ -7,7 +7,7 @@ using System.Windows.Media;
 
 namespace GameLevelRedactor
 {
-    public class Figure : Border, ICloneable 
+    public class Figure : Border, ICloneable
     {
         private static int counter;
         private int id;

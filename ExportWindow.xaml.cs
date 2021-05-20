@@ -10,33 +10,70 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using GameLevelRedactor.Data;
 
 namespace GameLevelRedactor
 {
     public partial class ExportWindow : Window
     {
-        private ObservableCollection<LevelData> levelsData;
+        private ObservableCollection<LevelData> levelsData = new();
         public ExportWindow()
         {
             InitializeComponent();
 
-            levelsData = new();
+            InitButtons();
+
             levelsList.ItemsSource = levelsData;
         }
-
+        private void InitButtons()
+        {
+            upItemButton.Click += (s, e) =>
+            {
+                if (levelsList.SelectedItem != null)
+                {
+                    LevelData selected = (LevelData)levelsList.SelectedItem;
+                    int index = levelsList.SelectedIndex;
+                    if (index > 0)
+                    {
+                        LevelData temp = levelsData[index - 1];
+                        levelsData[index - 1] = selected;
+                        levelsData[index] = temp;
+                        levelsList.SelectedIndex = index - 1;
+                    }
+                }
+            };
+            downItemButton.Click += (s, e) =>
+            {
+                if (levelsList.SelectedItem != null)
+                {
+                    LevelData selected = (LevelData)levelsList.SelectedItem;
+                    int index = levelsList.SelectedIndex;
+                    if (index < levelsData.Count - 1)
+                    {
+                        LevelData temp = levelsData[index + 1];
+                        levelsData[index + 1] = selected;
+                        levelsData[index] = temp;
+                        levelsList.SelectedIndex = index + 1;
+                    }
+                }
+            };
+            deleteItemButton.Click += (s, e) =>
+            {
+                if (levelsList.SelectedItem != null)
+                    levelsData.Remove((LevelData)levelsList.SelectedItem);
+            };
+        }
+        private void SendSetToServer(object sender, EventArgs e)
+        {
+            LevelsSetData lsd = new() { Tematic = tematicTextBox.Text, Levels = levelsData.ToList() };
+            //Отправка на сервер
+        }
         private void LevelsList_DragEnter(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 e.Effects = DragDropEffects.Move;
             }
-        }
-        private void LevelsList_DragLeave(object sender, DragEventArgs e)
-        {
         }
         private void LevelsList_Drop(object sender, DragEventArgs e)
         {

@@ -32,19 +32,25 @@
         </Menu>
         <ToolBar Grid.Row="1" Grid.Column="2" Height="30">
             <Button x:Name="arrowButton">
-                <Image Source="ToolbarImages/cursor.png" Width="24"/>
+                <Image Source="Resources/cursor.png" Width="24"/>
             </Button>
             <Button x:Name="ellipseButton">
-                <Image Source="ToolbarImages/ellipse.png" Width="24"/>
+                <Image Source="Resources/ellipse.png" Width="24"/>
             </Button>
             <Button x:Name="rectButton">
-                <Image Source="ToolbarImages/rectangle.png" Width="24"/>
+                <Image Source="Resources/rectangle.png" Width="24"/>
             </Button>
             <Button x:Name="triangleButton">
-                <Image Source="ToolbarImages/triangle.png" Width="24"/>
+                <Image Source="Resources/triangle.png" Width="24"/>
+            </Button>
+            <Button x:Name="polygoneButton">
+                <Image Source="Resources/polygon.png" Width="24"/>
+            </Button>
+            <Button x:Name="polylineButton">
+                <Image Source="Resources/polyline.png" Width="24"/>
             </Button>
             <Button x:Name="lineButton">
-                <Image Source="ToolbarImages/line.png" Width="24"/>
+                <Image Source="Resources/line.png" Width="24"/>
             </Button>
         </ToolBar>
         <StackPanel Grid.Column="2" Grid.Row="2" Background="{DynamicResource {x:Static SystemColors.AppWorkspaceBrushKey}}">
@@ -90,17 +96,19 @@
                                         Margin="5,0,0,0"
                                         Minimum="0"/>
                 </StackPanel>
-                <Button x:Name="disuniteFiguresButton"
-                        Content="Отсоединить"/>
             </StackPanel>
             <Separator/>
             <StackPanel x:Name="figureProperty" 
-                    MinHeight="150" 
-                    Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}">
-                <TextBlock Text="Свойста фигуры" HorizontalAlignment="Center"/>
+                        MinHeight="150" 
+                        Background="{DynamicResource {x:Static SystemColors.ControlLightBrushKey}}"
+                        VerticalAlignment="Bottom">
+                <TextBlock Text="Свойста фигуры"
+                           HorizontalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Имя: "/>
-                    <TextBox x:Name="figureTitle" MinWidth="100" MaxLength="15" MaxLines="1"/>
+                    <TextBox x:Name="figureTitle"
+                             MinWidth="100"
+                             MaxLength="15" MaxLines="1"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" 
                             Margin="0,5,0,0">
@@ -112,9 +120,11 @@
                 <TextBlock Text="Действия"
                            HorizontalAlignment="Center"/>
                 <Button x:Name ="unitFiguresButton"
-                        Content="Объединить с.."/>
+                        Content="Объединить"
+                        ToolTip="Объединить две фигуры в одну"/>
                 <Button x:Name ="setMajorFigureButton"
-                        Content="Связать с.."/>
+                        Content="Связать"
+                        ToolTip="Связать положение двух фигур"/>
                 <Button x:Name="deleteFigureButton"
                         Content="Удалить"/>
             </StackPanel>
@@ -127,10 +137,10 @@
                 Grid.Column="0" 
                 Grid.ColumnSpan="2" >
             <Canvas Name="canvas" 
-                MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
-                MouseMove="Canvas_MouseMove"
-                MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
-                Background="WhiteSmoke">
+                    MouseLeftButtonDown="Canvas_MouseLeftButtonDown"
+                    MouseMove="Canvas_MouseMove"
+                    MouseLeftButtonUp="Canvas_MouseLeftButtonUp"
+                    Background="WhiteSmoke">
             </Canvas>
         </Border>
         

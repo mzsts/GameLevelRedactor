@@ -7,11 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="ToolbarImages\cursor.png" />
-    <None Remove="ToolbarImages\ellipse.png" />
-    <None Remove="ToolbarImages\line.png" />
-    <None Remove="ToolbarImages\rectangle.png" />
-    <None Remove="ToolbarImages\triangle.png" />
+    <None Remove="Resources\cursor.png" />
+    <None Remove="Resources\down-arrow.png" />
+    <None Remove="Resources\ellipse.png" />
+    <None Remove="Resources\line.png" />
+    <None Remove="Resources\polygon.png" />
+    <None Remove="Resources\polyline.png" />
+    <None Remove="Resources\rectangle.png" />
+    <None Remove="Resources\red-delete.png" />
+    <None Remove="Resources\triangle.png" />
+    <None Remove="Resources\up-arrow.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,11 +26,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="ToolbarImages\cursor.png" />
-    <Resource Include="ToolbarImages\ellipse.png" />
-    <Resource Include="ToolbarImages\line.png" />
-    <Resource Include="ToolbarImages\rectangle.png" />
-    <Resource Include="ToolbarImages\triangle.png" />
+    <Resource Include="Resources\cursor.png" />
+    <Resource Include="Resources\down-arrow.png" />
+    <Resource Include="Resources\ellipse.png" />
+    <Resource Include="Resources\line.png" />
+    <Resource Include="Resources\polygon.png" />
+    <Resource Include="Resources\polyline.png" />
+    <Resource Include="Resources\rectangle.png" />
+    <Resource Include="Resources\red-delete.png" />
+    <Resource Include="Resources\triangle.png" />
+    <Resource Include="Resources\up-arrow.png" />
   </ItemGroup>
 
 </Project>
