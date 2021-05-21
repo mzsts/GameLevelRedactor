@@ -13,10 +13,8 @@
             <RowDefinition Height="20" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-
         <TextBlock>Введите имя уровня:</TextBlock>
         <TextBox Name="levelNameBox" Grid.Row="1" MinWidth="250">Уровень1</TextBox>
-
         <WrapPanel Grid.Row="2" HorizontalAlignment="Right" Margin="0,15,0,0">
             <Button IsDefault="True" Click="Accept_Click" MinWidth="60" Margin="0,0,10,0">OK</Button>
             <Button IsCancel="True" MinWidth="60">Отмена</Button>

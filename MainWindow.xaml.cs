@@ -1,11 +1,11 @@
-﻿using System.Windows;
+﻿using System;
+using System.IO;
+using System.Windows;
+using Microsoft.Win32;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Controls;
 using System.Collections.ObjectModel;
-using System.IO;
-using System;
-using Microsoft.Win32;
 
 namespace GameLevelRedactor
 {
@@ -15,9 +15,7 @@ namespace GameLevelRedactor
         Ellipse,
         Line,
         Triengle,
-        Arrow,
-        Polygon,
-        Polyline
+        Arrow
     }
     public enum HitTypes
     {
@@ -115,6 +113,16 @@ namespace GameLevelRedactor
                 }
                 
             };
+
+            Closing += (s, e) =>
+            {
+                if (figures.Count > 0)
+                {
+                    MessageBoxResult result = MessageBox.Show("Хотите сохранить данные?", "", MessageBoxButton.YesNo);
+                    if (result == MessageBoxResult.Yes)
+                        OpenFile(s, e);
+                }
+            };
         }
 
         private void Canvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -123,16 +131,6 @@ namespace GameLevelRedactor
 
             if (currentTool != Tools.Arrow)
             {
-                //if (e.ClickCount == 2 && currentTool == Tools.Polygon)
-                //{
-                //    ((PathGeometry)currentFigure.Primitives[0].GeometryDrawing.Geometry)
-                //            .Figures[0].Segments.Add(new LineSegment(currentPoint, true));
-
-                //    currentAction = ActionTypes.None;
-                //    currentFigure.DrawPoint = GetDrawPoint();
-                //    return;
-                //}
-
                 currentAction = ActionTypes.Draw;
 
                 currentFigure = new Figure
@@ -153,9 +151,6 @@ namespace GameLevelRedactor
                 Canvas.SetTop(currentFigure, currentPoint.Y);
                 Canvas.SetLeft(currentFigure, currentPoint.X);
                 Canvas.SetZIndex(currentFigure, ++lastZIndex);
-
-                //if (currentTool == Tools.Polygon || currentTool == Tools.Polyline)
-                //    Draw(currentPoint);
 
                 return;
             }
@@ -198,7 +193,7 @@ namespace GameLevelRedactor
         {
             Point currentPoint = e.GetPosition(canvas);
 
-            if (currentAction == ActionTypes.Draw/* && (currentTool != Tools.Polygon || currentTool != Tools.Polyline)*/)
+            if (currentAction == ActionTypes.Draw)
             {
                 Draw(currentPoint);
                 return;
@@ -229,8 +224,9 @@ namespace GameLevelRedactor
 
             if (currentAction == ActionTypes.Drag)
             {
-                currentFigure.DrawPoint = GetDrawPoint();
-                MakeNewPrimitive(currentFigure.DrawPoint);
+                Point newDrawPoint = GetDrawPoint();
+                MakeNewPrimitive(newDrawPoint);
+                currentFigure.DrawPoint = newDrawPoint;
             }
 
             currentAction = ActionTypes.None;
@@ -259,21 +255,6 @@ namespace GameLevelRedactor
                     currentFigure.Primitives[0].GeometryDrawing.Geometry =
                         MakeRightTriangle(currentFigure.DrawPoint, currentPoint);
                     break;
-                //case Tools.Polygon:
-                //    if (currentFigure.Primitives[0].Type == null)
-                //    {
-                //        currentFigure.Primitives[0].Type = "Многоугольник";
-                //        PathFigure pf = new() { IsClosed = true };
-                //        pf.StartPoint = currentPoint;
-                //        currentFigure.Primitives[0].GeometryDrawing.Geometry = new PathGeometry() { FillRule = FillRule.Nonzero };
-                //        ((PathGeometry)currentFigure.Primitives[0].GeometryDrawing.Geometry).Figures.Add(pf);
-                //    }
-                //    else
-                //    {
-                //        ((PathGeometry)currentFigure.Primitives[0].GeometryDrawing.Geometry)
-                //            .Figures[0].Segments.Add(new LineSegment(currentPoint, true));
-                //    }
-                //    break;
                 default:
                     break;
             }
@@ -538,7 +519,7 @@ namespace GameLevelRedactor
         }
         private void SetCursor()
         {
-            if (/*currentFigure == null || */currentTool != Tools.Arrow)
+            if (currentTool != Tools.Arrow)
             {
                 Cursor = Cursors.Arrow;
                 return;
@@ -570,27 +551,58 @@ namespace GameLevelRedactor
             SetZIndexes();
 
             SetLevelNameWindow setLevelNameWindow = new();
-
-            string levelName = "Level_1";
-
             if (setLevelNameWindow.ShowDialog() == true)
             {
-                levelName = setLevelNameWindow.LevelName;
-            }
+                if (setLevelNameWindow.DialogResult == false)
+                    return;
 
-            string jsonString = Parser.ToJson(levelName, figures);
+                string levelName = setLevelNameWindow.LevelName;
+                string jsonString = Parser.ToJson(levelName, figures);
 
-            SaveFileDialog saveFileDialog = new() { Filter = "Файл уровня|*.json"};
-            if (saveFileDialog.ShowDialog() == true)
+                SaveFileDialog saveFileDialog = new() { Filter = "Файл уровня|*.json" };
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    File.WriteAllText(saveFileDialog.FileName, jsonString);
+                }
+            }  
+        }
+        private void OpenFile(object sender, EventArgs e)
+        {
+            OpenFileDialog openFileDialog = new() { Filter = "Файл уровня|*.json", Multiselect = false };
+            if (openFileDialog.ShowDialog() == true)
             {
-                File.WriteAllText(saveFileDialog.FileName, jsonString);
+                try
+                {
+                    figures = Parser.FromJson(File.ReadAllText(openFileDialog.FileName));
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Данный файл не является файлом уровня", "Ошибка", MessageBoxButton.OK);
+                    return;
+                }
+
+                canvas.Children.Clear();
+                FiguresVisualTreeView.ItemsSource = figures;
+
+                foreach (Figure figure in figures)
+                {
+                    canvas.Children.Add(figure);
+                    Canvas.SetLeft(figure, figure.DrawPoint.X);
+                    Canvas.SetTop(figure, figure.DrawPoint.Y);
+                    Canvas.SetZIndex(figure, figure.ZIndex);
+                }
             }
+            
         }
         private void InitHotKeys()
         {
             CommandBinding saveCommand = new() { Command = ApplicationCommands.Save };
             saveCommand.Executed += SaveFile;
             CommandBindings.Add(saveCommand);
+
+            CommandBinding openCommand = new() { Command = ApplicationCommands.Open };
+            openCommand.Executed += OpenFile;
+            CommandBindings.Add(openCommand);
 
             CommandBinding copyCommand = new() { Command = ApplicationCommands.Copy };
             copyCommand.Executed += CopyFigure;
@@ -610,8 +622,6 @@ namespace GameLevelRedactor
             ellipseButton.Click += (s, e) => currentTool = Tools.Ellipse;
             rectButton.Click += (s, e) => currentTool = Tools.Rect;
             triangleButton.Click += (s, e) => currentTool = Tools.Triengle;
-            polygoneButton.Click += (s, e) => currentTool = Tools.Polygon;
-            polylineButton.Click += (s, e) => currentTool = Tools.Polyline;
             lineButton.Click += (s, e) => currentTool = Tools.Line;
 
             unitFiguresButton.Click += (s, e) => currentAction = ActionTypes.Unit;
@@ -622,8 +632,6 @@ namespace GameLevelRedactor
                 else
                     MessageBox.Show("Эта фигура уже имеет привязку", "Действие невозможно", MessageBoxButton.OK);
             };
-            
-
         }
         private void CopyFigure(object sender, ExecutedRoutedEventArgs e) 
         {
@@ -648,6 +656,7 @@ namespace GameLevelRedactor
         {
             if (currentFigure == null)
                 return;
+
             figures.Remove(currentFigure);
             canvas.Children.Remove(currentFigure);
 

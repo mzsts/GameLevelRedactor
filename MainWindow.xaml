@@ -24,9 +24,8 @@
               Height="25"
               VerticalAlignment="Top" HorizontalAlignment="Stretch" Width="Auto">
             <MenuItem Header="Файл">
-                <MenuItem Header="Открыть"/>
+                <MenuItem Header="Открыть" Click="OpenFile"/>
                 <MenuItem Header="Сохранить" Click="SaveFile"/>
-                <MenuItem Header="Закрыть"/>
             </MenuItem>
             <MenuItem Header="Экспорт" x:Name="exportButton"></MenuItem>
         </Menu>
@@ -42,12 +41,6 @@
             </Button>
             <Button x:Name="triangleButton">
                 <Image Source="Resources/triangle.png" Width="24"/>
-            </Button>
-            <Button x:Name="polygoneButton">
-                <Image Source="Resources/polygon.png" Width="24"/>
-            </Button>
-            <Button x:Name="polylineButton">
-                <Image Source="Resources/polyline.png" Width="24"/>
             </Button>
             <Button x:Name="lineButton">
                 <Image Source="Resources/line.png" Width="24"/>
@@ -77,8 +70,8 @@
                            HorizontalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal" 
                             Margin="0,5,0,0">
-                        <TextBlock Text="Цвет заливки:"/>
-                        <xctk:ColorPicker Name="fillColor" 
+                    <TextBlock Text="Цвет заливки:"/>
+                    <xctk:ColorPicker Name="fillColor" 
                                           Width="50" 
                                           Margin="10,0,0,0"/>
                 </StackPanel>
@@ -129,7 +122,6 @@
                         Content="Удалить"/>
             </StackPanel>
         </StackPanel>
-
         <Border BorderThickness="1" 
                 BorderBrush="Black" 
                 Grid.Row="1" 
@@ -143,7 +135,5 @@
                     Background="WhiteSmoke">
             </Canvas>
         </Border>
-        
-
     </Grid>
 </Window>

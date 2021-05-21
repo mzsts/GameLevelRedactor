@@ -61,7 +61,7 @@ namespace GameLevelRedactor.Data
             
             if (primitive.GeometryDrawing.Geometry is PathGeometry pathGeometry)
             {
-                Type = "Triengle";
+                Type = "Triangle";
 
                 PathFigure pf_triangle = pathGeometry.Figures[0];
 

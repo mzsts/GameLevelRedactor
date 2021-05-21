@@ -11,8 +11,6 @@
     <None Remove="Resources\down-arrow.png" />
     <None Remove="Resources\ellipse.png" />
     <None Remove="Resources\line.png" />
-    <None Remove="Resources\polygon.png" />
-    <None Remove="Resources\polyline.png" />
     <None Remove="Resources\rectangle.png" />
     <None Remove="Resources\red-delete.png" />
     <None Remove="Resources\triangle.png" />
@@ -30,8 +28,6 @@
     <Resource Include="Resources\down-arrow.png" />
     <Resource Include="Resources\ellipse.png" />
     <Resource Include="Resources\line.png" />
-    <Resource Include="Resources\polygon.png" />
-    <Resource Include="Resources\polyline.png" />
     <Resource Include="Resources\rectangle.png" />
     <Resource Include="Resources\red-delete.png" />
     <Resource Include="Resources\triangle.png" />

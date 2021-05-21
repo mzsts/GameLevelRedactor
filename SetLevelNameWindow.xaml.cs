@@ -22,7 +22,7 @@ namespace GameLevelRedactor
         }
         private void Accept_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = true;
+            DialogResult = true;
         }
 
         public string LevelName
