@@ -77,12 +77,12 @@ namespace GameLevelRedactor
 
             figureAngle.ValueChanged += (s, e) =>
             {
-                if (figureAngle.Value != null)
+                if (figureAngle.Value != null && currentFigure != null)
                     currentFigure.Angle = (double)figureAngle.Value;
             };
             figureTitle.TextChanged += (s, e) =>
             {
-                if (!String.IsNullOrEmpty(figureTitle.Text))
+                if (!String.IsNullOrEmpty(figureTitle.Text) && currentFigure != null)
                 {
                     currentFigure.Title = figureTitle.Text;
 

@@ -39,7 +39,7 @@
                             Margin="5,0,0,0"
                             Grid.Column="1">
                     <Label Content="Тематика сета: "/>
-                    <TextBox x:Name="tematicTextBox" 
+                    <TextBox x:Name="tagTextBox" 
                              MaxLines="1" MaxLength="15"
                              MinWidth="100"
                              BorderBrush="Black" BorderThickness="1"
@@ -49,7 +49,7 @@
                         MaxWidth="200" MinWidth="100"
                         Margin="3"
                         HorizontalAlignment="Right"
-                        Content="Загрузить сет"/>
+                        Content="Отправить сет"/>
             </Grid>
         </Border>
         <ListView x:Name="levelsList"
